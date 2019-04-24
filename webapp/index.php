@@ -40,13 +40,14 @@
             //echo "Table no: " . $row["table_no"]. " - Item ID: " . $row["item_id"]. " " . $row["timestamp"]. " ".$row["completed"]."<br>";
             if (!in_array($row["table_no"], array_keys($orders)))
             {
-                $orders[$row["table_no"]] = [[$row["item_id"]], [$row['quantity']], $row["timestamp"], $row["completed"]];
+                $orders[$row["table_no"]] = [[$row["item_id"]], [$row['quantity']], $row["timestamp"], [$row["completed"]]];
             }
             else
             {
                 $table_no = $row["table_no"];
                 array_push($orders[$table_no][0], $row["item_id"]);
                 array_push($orders[$table_no][1], $row["quantity"]);
+                array_push($orders[$table_no][3], $row["completed"]);
             }
         }
         
@@ -64,7 +65,8 @@
         
         foreach($orders as $k=>$v)
         {
-            if ($v[3]){
+            
+            if (array_filter($v[3]) == $v[3]){
                 $class = "success";
             }
             else{
@@ -104,7 +106,7 @@
             echo '<td class="text-center">'.$v[2]."</td>";
             
             echo '<td class="text-center">';
-            if ($v[3]){
+            if (array_filter($v[3]) == $v[3]){
                 
                 echo '<h3><span class="label label-success">Completed</span></h3>';
             }
@@ -119,7 +121,23 @@
         else {
         echo '<div class="jumbotron text-center"><h2>No Orders<h2></div>';
     }
-    //print_r($orders);
+
+    echo "</tbody></table><br>";
+
+    echo '<h1 class="heading">Bills to be sent</h1>';
+    
+    echo '<form action="bill.php" method="POST">';
+    foreach($orders as $k=>$v)
+    {
+        echo "<p>Generate Bill for table number $k:&nbsp;";
+        if (array_filter($v[3]) == $v[3])
+        {
+            echo '<button class="btn btn-info" type="submit" name="bill" value="'.$k.'">Generate Bill</button>';
+        }
+        echo "</p>";
+    }
+
+    echo '</form>';
     mysqli_close($conn);
 ?>
 
